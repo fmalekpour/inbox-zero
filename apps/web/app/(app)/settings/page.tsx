@@ -57,7 +57,7 @@ export default function SettingsPage() {
   return (
     <div className="content-container pb-12">
       <div className="mx-auto max-w-5xl space-y-6 pt-4">
-        <PageHeader title="Settings" />
+        <PageHeader title="Inbox Zero Settings" />
 
         <SettingsCard
           icon={<MailIcon className="size-5" />}
