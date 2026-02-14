@@ -10,6 +10,8 @@ Module._load = function (request: string, parent: unknown, isMain: boolean) {
   return originalLoad.call(this, request, parent, isMain);
 };
 
+let logger: ReturnType<(typeof import("@/utils/logger"))["createScopedLogger"]>;
+
 async function main() {
   const [{ createScopedLogger }, { ensurePullingPollSchedule },
     { startPullingWorkers }] = await Promise.all([
@@ -18,7 +20,7 @@ async function main() {
     import("@/utils/pulling/workers"),
   ]);
 
-  const logger = createScopedLogger("pulling-runner");
+  logger = createScopedLogger("pulling-runner");
   await ensurePullingPollSchedule({ everyMs: 30_000 });
   const workers = startPullingWorkers();
 
@@ -31,6 +33,11 @@ async function main() {
 }
 
 main().catch((error) => {
-  logger.error("Failed to start pulling workers", { error });
+  if (logger) {
+    logger.error("Failed to start pulling workers", { error });
+  } else {
+    // eslint-disable-next-line no-console
+    console.error("Failed to start pulling workers", error);
+  }
   process.exit(1);
 });
