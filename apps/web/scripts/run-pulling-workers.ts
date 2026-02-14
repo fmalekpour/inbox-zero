@@ -1,10 +1,24 @@
-import { ensurePullingPollSchedule } from "@/utils/pulling/queues";
-import { startPullingWorkers } from "@/utils/pulling/workers";
-import { createScopedLogger } from "@/utils/logger";
+import { createRequire } from "node:module";
 
-const logger = createScopedLogger("pulling-runner");
+const require = createRequire(import.meta.url);
+// biome-ignore lint/suspicious/noExplicitAny: we need to monkeypatch module loader
+const Module = require("module") as any;
+const originalLoad = Module._load;
+
+Module._load = function (request: string, parent: unknown, isMain: boolean) {
+  if (request === "server-only") return {};
+  return originalLoad.call(this, request, parent, isMain);
+};
 
 async function main() {
+  const [{ createScopedLogger }, { ensurePullingPollSchedule },
+    { startPullingWorkers }] = await Promise.all([
+    import("@/utils/logger"),
+    import("@/utils/pulling/queues"),
+    import("@/utils/pulling/workers"),
+  ]);
+
+  const logger = createScopedLogger("pulling-runner");
   await ensurePullingPollSchedule({ everyMs: 30_000 });
   const workers = startPullingWorkers();
 
