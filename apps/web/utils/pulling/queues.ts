@@ -6,8 +6,8 @@ import { buildPullingMessageJobId } from "@/utils/pulling/ids";
 
 const logger = createScopedLogger("pulling-queue");
 
-export const PULLING_POLL_QUEUE = "pulling:poll";
-export const PULLING_MESSAGE_QUEUE = "pulling:message";
+export const PULLING_POLL_QUEUE = "pulling-poll";
+export const PULLING_MESSAGE_QUEUE = "pulling-message";
 
 export type PullingPollJob = {
   jobType: "poll-accounts";
