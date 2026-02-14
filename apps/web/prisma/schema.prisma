@@ -169,6 +169,7 @@ model EmailAccount {
   cleanupJobs      CleanupJob[]
   cleanupThreads   CleanupThread[]
   emailMessages    EmailMessage[]
+  emailPullMessages EmailPullMessage[]
   emailTokens      EmailToken[]
   knowledge        Knowledge[]
   chats            Chat[]
@@ -731,6 +732,26 @@ model EmailMessage {
   @@index([emailAccountId, date])
   @@index([emailAccountId, from])
   @@index([emailAccountId, fromName])
+}
+
+model EmailPullMessage {
+  id            String            @id @default(cuid())
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  emailAccountId String
+  emailAccount  EmailAccount      @relation(fields: [emailAccountId], references: [id], onDelete: Cascade)
+  messageId     String
+  threadId      String?
+  status        PullMessageStatus @default(PENDING)
+  processedAt   DateTime?
+  lastAttemptAt DateTime?
+  attemptCount  Int               @default(0)
+  lastError     String?
+  sourceHistoryId String?
+
+  @@unique([emailAccountId, messageId])
+  @@index([emailAccountId, status])
+  @@index([emailAccountId, processedAt])
 }
 
 model ResponseTime {
@@ -1329,6 +1350,14 @@ enum ScheduledActionStatus {
   COMPLETED
   FAILED
   CANCELLED
+}
+
+enum PullMessageStatus {
+  PENDING
+  PROCESSING
+  PROCESSED
+  FAILED
+  SKIPPED
 }
 
 enum SchedulingStatus {

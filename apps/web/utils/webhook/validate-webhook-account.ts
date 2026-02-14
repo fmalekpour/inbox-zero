@@ -7,7 +7,10 @@ import prisma from "@/utils/prisma";
 import type { Logger } from "@/utils/logger";
 
 export async function getWebhookEmailAccount(
-  where: { email: string } | { watchEmailsSubscriptionId: string },
+  where:
+    | { email: string }
+    | { watchEmailsSubscriptionId: string }
+    | { id: string },
   logger: Logger,
 ) {
   const query = {
@@ -58,6 +61,13 @@ export async function getWebhookEmailAccount(
   if ("email" in where) {
     return await prisma.emailAccount.findUnique({
       where: { email: where.email },
+      ...query,
+    });
+  }
+
+  if ("id" in where) {
+    return await prisma.emailAccount.findUnique({
+      where: { id: where.id },
       ...query,
     });
   }

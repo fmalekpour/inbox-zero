@@ -83,6 +83,9 @@ export const env = createEnv({
     UPSTASH_REDIS_TOKEN: z.string().optional(),
     REDIS_URL: z.string().optional(), // used for subscriptions
 
+  PULLING_ENABLED: booleanString.optional().default(false),
+  PULLING_DRY_RUN: booleanString.optional().default(false),
+
     QSTASH_TOKEN: z.string().optional(),
     QSTASH_CURRENT_SIGNING_KEY: z.string().optional(),
     QSTASH_NEXT_SIGNING_KEY: z.string().optional(),

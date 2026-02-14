@@ -102,6 +102,7 @@
     "ai": "6.0.78",
     "better-auth": "1.4.18",
     "braintrust": "2.2.0",
+    "bullmq": "5.58.1",
     "capital-case": "2.0.0",
     "cheerio": "1.2.0",
     "class-variance-authority": "0.7.1",
