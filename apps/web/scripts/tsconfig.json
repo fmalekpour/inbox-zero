@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "module": "esnext",
+    "target": "esnext",
+    "outDir": "./",
+    "rootDir": "./",
+    "skipLibCheck": true,
+    "noEmit": false
+  },
+  "include": ["run-pulling-workers.ts"]
+}
