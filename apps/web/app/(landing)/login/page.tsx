@@ -37,7 +37,7 @@ export default async function AuthenticationPage(props: {
         <div className="flex flex-col text-center">
           <h1 className="font-title text-2xl text-foreground">Sign In</h1>
           <p className="mt-4 text-muted-foreground">
-            Your AI personal assistant for email.
+            InboxZero - Your AI personal assistant for email.
           </p>
         </div>
         <div className="mt-4">
