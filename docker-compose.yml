@@ -57,8 +57,11 @@ services:
       - all
 
   web:
-    image: ghcr.io/fmalekpour/inbox-zero:latest
-    pull_policy: always
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.prod
+    # image: ghcr.io/fmalekpour/inbox-zero:latest
+    # pull_policy: always
     env_file:
       - ./apps/web/.env
     depends_on:
@@ -83,8 +86,11 @@ services:
     restart: always
 
   pulling-workers:
-    image: ghcr.io/fmalekpour/inbox-zero:latest
-    pull_policy: always
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.prod
+    # image: ghcr.io/fmalekpour/inbox-zero:latest
+    # pull_policy: always
     env_file:
       - ./apps/web/.env
     environment:
