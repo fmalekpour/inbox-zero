@@ -57,7 +57,7 @@ services:
       - all
 
   web:
-    image: ghcr.io/elie222/inbox-zero:latest
+    image: ghcr.io/fmalekpour/inbox-zero:latest
     pull_policy: always
     env_file:
       - ./apps/web/.env
@@ -81,6 +81,31 @@ services:
       UPSTASH_REDIS_URL: ${UPSTASH_REDIS_URL:-http://serverless-redis-http:80}
       INTERNAL_API_URL: ${INTERNAL_API_URL:-http://web:3000}
     restart: always
+
+  pulling-workers:
+    image: ghcr.io/fmalekpour/inbox-zero:latest
+    pull_policy: always
+    env_file:
+      - ./apps/web/.env
+    environment:
+      PULLING_ENABLED: ${PULLING_ENABLED:-true}
+      PULLING_DRY_RUN: ${PULLING_DRY_RUN:-false}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-inboxzero}?schema=public}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      UPSTASH_REDIS_URL: ${UPSTASH_REDIS_URL:-http://serverless-redis-http:80}
+    command: ["sh", "-c", "cd /app/apps/web && pnpm exec tsx scripts/run-pulling-workers.ts"]
+    depends_on:
+      db:
+        condition: service_healthy
+        required: false
+      redis:
+        condition: service_started
+        required: false
+      web:
+        condition: service_started
+    networks:
+      - inbox-zero-network
+    restart: unless-stopped
 
   cron:
     image: alpine:latest
