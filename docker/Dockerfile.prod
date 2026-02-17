@@ -76,8 +76,8 @@ RUN npx prisma generate --schema=apps/web/prisma/schema.prisma \
  && cd ../.. \
  && rm -rf apps/web/.next/cache
 
-# Bundle worker script using esbuild (no type checking, just transpile)
-RUN cd apps/web && pnpm exec esbuild scripts/run-pulling-workers.ts --bundle --platform=node --format=esm --outfile=scripts/run-pulling-workers.js --external:@prisma/client --external:@prisma/adapter-pg --external:bullmq --external:ioredis --external:pg --external:googleapis --external:@google-cloud/pubsub --external:nodemailer --external:@sentry/nextjs
+# Bundle worker script using esbuild (bundle everything except native modules)
+RUN cd apps/web && pnpm exec esbuild scripts/run-pulling-workers.ts --bundle --platform=node --format=esm --outfile=scripts/run-pulling-workers.js --external:@prisma/client --external:pg --external:@node-rs/argon2 --external:@node-rs/bcrypt
 
 FROM node:22-alpine AS runner
 
