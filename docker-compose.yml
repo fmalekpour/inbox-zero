@@ -99,7 +99,7 @@ services:
       DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-inboxzero}?schema=public}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       UPSTASH_REDIS_URL: ${UPSTASH_REDIS_URL:-http://serverless-redis-http:80}
-    command: ["sh", "-c", "cd /app/apps/web && tsx --tsconfig tsconfig.json scripts/run-pulling-workers.ts"]
+    command: ["sh", "-c", "cd /app/apps/web && tsx --tsconfig tsconfig.worker.json scripts/run-pulling-workers.ts"]
     depends_on:
       db:
         condition: service_healthy
