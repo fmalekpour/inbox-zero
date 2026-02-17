@@ -28,7 +28,8 @@ export const GET = withError("cron/pulling", async (request) => {
 });
 
 export const POST = withError("cron/pulling", async (request) => {
-  if (!(await hasPostCronSecret(request))) {
+  console.log("[pulling] Received pulling trigger");
+  if (!hasCronSecret(request)) {
     captureException(new Error("Unauthorized request: api/cron/pulling"));
     return new Response("Unauthorized", { status: 401 });
   }
