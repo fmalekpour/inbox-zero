@@ -121,7 +121,12 @@ COPY --from=builder /app/apps/web/types ./apps/web/types
 COPY --from=builder /app/apps/web/lib ./apps/web/lib
 COPY --from=builder /app/apps/web/tsconfig.json ./apps/web/tsconfig.json
 COPY --from=builder /app/tsconfig.json ./tsconfig.json
-COPY --from=builder /app/packages ./packages
+COPY --from=builder /app/packages/tsconfig ./packages/tsconfig
+COPY --from=builder /app/packages/loops ./packages/loops
+COPY --from=builder /app/packages/resend ./packages/resend
+COPY --from=builder /app/packages/slack ./packages/slack
+COPY --from=builder /app/packages/tinybird ./packages/tinybird
+COPY --from=builder /app/packages/tinybird-ai-analytics ./packages/tinybird-ai-analytics
 
 # Copy runtime scripts
 COPY docker/scripts /app/docker/scripts
