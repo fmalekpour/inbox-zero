@@ -47,7 +47,7 @@ services:
       - ./apps/web/.env
     environment:
       SRH_MODE: env
-      SRH_TOKEN: ${UPSTASH_REDIS_TOKEN}
+      SRH_TOKEN: ${UPSTASH_REDIS_TOKEN:-local_redis_token_12345678}
       SRH_CONNECTION_STRING: "redis://redis:6379" # Using `redis` hostname since they're in the same Docker network.
     networks:
       - inbox-zero-network
@@ -86,6 +86,7 @@ services:
       PULLING_ENABLED: ${PULLING_ENABLED:-true}
       PULLING_DRY_RUN: ${PULLING_DRY_RUN:-false}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      UPSTASH_REDIS_TOKEN: ${UPSTASH_REDIS_TOKEN:-local_redis_token_12345678}
     restart: always
 
   cron:
