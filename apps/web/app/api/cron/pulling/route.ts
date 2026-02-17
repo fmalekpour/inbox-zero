@@ -37,8 +37,11 @@ export const POST = withError("cron/pulling", async (request) => {
     return NextResponse.json({ skipped: true, reason: "pulling-disabled" });
   }
 
+  console.log("[pulling] Starting ensurePullingPollSchedule...");
   await ensurePullingPollSchedule({ everyMs: POLL_INTERVAL_MS });
+  console.log("[pulling] Starting pollAllAccounts...");
   await pollAllAccounts();
+  console.log("[pulling] Completed successfully");
 
   return NextResponse.json({ ok: true });
 });
