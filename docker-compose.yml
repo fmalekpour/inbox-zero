@@ -87,13 +87,19 @@ services:
       PULLING_DRY_RUN: ${PULLING_DRY_RUN:-false}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
     restart: always
-    command: ["sh", "-c", "node /app/apps/web/server.js & (sleep 10 && cd /app/apps/web && /usr/local/bin/tsx --tsconfig tsconfig.worker.json scripts/run-pulling-workers.ts)"]
 
   cron:
     image: alpine:latest
     command: >
       sh -c "
         apk add --no-cache curl &&
+        (
+          while true; do
+            echo \"[cron] Triggering pulling system...\"
+            curl -s -X POST 'http://web:3000/api/cron/pulling' -H \"Authorization: Bearer $${CRON_SECRET}\" || echo \"[cron] Warning: pulling request failed\"
+            sleep 30
+          done
+        ) &
         (
           while true; do
             echo \"[cron] Processing scheduled actions...\"
