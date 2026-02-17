@@ -113,6 +113,10 @@ COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=builder /app/apps/web/public ./apps/web/public
 COPY --from=builder /app/apps/web/prisma ./apps/web/prisma
 
+# Copy full node_modules for worker dependencies
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/web/node_modules ./apps/web/node_modules
+
 # Copy TypeScript worker script and its dependencies from builder
 COPY --from=builder /app/apps/web/scripts/run-pulling-workers.ts ./apps/web/scripts/run-pulling-workers.ts
 COPY --from=builder /app/apps/web/utils ./apps/web/utils
