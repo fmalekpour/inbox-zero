@@ -114,6 +114,7 @@ COPY --from=builder /app/apps/web/app/api ./apps/web/app/api
 COPY --from=builder /app/apps/web/types ./apps/web/types
 COPY --from=builder /app/apps/web/env.ts ./apps/web/env.ts
 COPY --from=builder /app/apps/web/tsconfig.json ./apps/web/tsconfig.json
+COPY --from=builder /app/apps/web/tsconfig.worker.json ./apps/web/tsconfig.worker.json
 
 # Copy runtime scripts
 COPY docker/scripts /app/docker/scripts
