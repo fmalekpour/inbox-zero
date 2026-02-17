@@ -3,8 +3,13 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-RUN apk add --no-cache openssl
-RUN npm install -g pnpm@10.22.0
+RUN apk add --no-cache opRUN npx prisma generate --schema=apps/web/prisma/schema.prisma \
+ && cd apps/web \
+ && pnpm exec next build \
+ && cd ../.. \
+ && rm -rf apps/web/.next/cache
+
+# === Production image ===ll -g pnpm@10.22.0
 
 # Copy lockfiles/workspace manifests for better caching
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc* ./
@@ -101,15 +106,23 @@ COPY --from=builder /app/apps/web/.next/standalone ./
 COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=builder /app/apps/web/public ./apps/web/public
 COPY --from=builder /app/apps/web/prisma ./apps/web/prisma
-# Copy compiled worker script
-COPY --from=builder /app/apps/web/scripts/run-pulling-workers.js ./apps/web/scripts/run-pulling-workers.js
+
+# Copy TypeScript worker script and its dependencies from builder
+COPY --from=builder /app/apps/web/scripts/run-pulling-workers.ts ./apps/web/scripts/run-pulling-workers.ts
+COPY --from=builder /app/apps/web/utils ./apps/web/utils
+COPY --from=builder /app/apps/web/app ./apps/web/app
+COPY --from=builder /app/apps/web/types ./apps/web/types
+COPY --from=builder /app/apps/web/lib ./apps/web/lib
+COPY --from=builder /app/apps/web/tsconfig.json ./apps/web/tsconfig.json
+COPY --from=builder /app/tsconfig.json ./tsconfig.json
+COPY --from=builder /app/packages ./packages
 
 # Copy runtime scripts
 COPY docker/scripts /app/docker/scripts
 RUN chmod +x /app/docker/scripts/*.sh
 
-# Install Prisma CLI globally for migrations
-RUN npm install -g prisma@7.3.0
+# Install Prisma CLI and tsx for running TypeScript worker
+RUN npm install -g prisma@7.3.0 tsx@4.21.0
 # Set NODE_PATH so prisma/config imports resolve correctly
 ENV NODE_PATH=/usr/local/lib/node_modules
 
