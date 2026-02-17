@@ -41,7 +41,10 @@ export async function processPullingMessage(job: PullingMessageJob) {
       where: { emailAccountId_messageId: { emailAccountId, messageId } },
       data: { status: "SKIPPED", processedAt: new Date() },
     });
-    scopedLogger.info("Dry run enabled, skipping processing");
+    scopedLogger.info("Dry run enabled, skipping processing", {
+      PULLING_DRY_RUN: env.PULLING_DRY_RUN,
+      type: typeof env.PULLING_DRY_RUN,
+    });
     return;
   }
 
