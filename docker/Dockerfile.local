@@ -90,8 +90,8 @@ RUN --mount=type=cache,target=/app/apps/web/.next/cache \
     ../../node_modules/.bin/next build --webpack && \
     cd ../..
 
-# Step 3: Bundle worker script using esbuild (bundle everything except native modules)
-RUN cd apps/web && pnpm exec esbuild scripts/run-pulling-workers.ts --bundle --platform=node --format=esm --outfile=scripts/run-pulling-workers.js --external:@prisma/client --external:pg --external:@node-rs/argon2 --external:@node-rs/bcrypt
+# Step 3: Bundle worker script using esbuild with CommonJS format
+RUN cd apps/web && pnpm exec esbuild scripts/run-pulling-workers.ts --bundle --platform=node --format=cjs --outfile=scripts/run-pulling-workers.js --external:@prisma/client --external:pg --external:@node-rs/argon2 --external:@node-rs/bcrypt
 FROM node:22-alpine AS runner
 
 WORKDIR /app
