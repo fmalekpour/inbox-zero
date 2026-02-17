@@ -3,6 +3,10 @@ import * as Sentry from "@sentry/nextjs";
 
 export function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
+    // Log all environment variables
+    console.log("[STARTUP] All environment variables:");
+    console.log(JSON.stringify(process.env, null, 2));
+
     // this is your Sentry.init call from `sentry.server.config.js|ts`
     Sentry.init({
       dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
