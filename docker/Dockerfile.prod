@@ -107,23 +107,13 @@ COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=builder /app/apps/web/public ./apps/web/public
 COPY --from=builder /app/apps/web/prisma ./apps/web/prisma
 
-# Copy full node_modules for worker dependencies
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/apps/web/node_modules ./apps/web/node_modules
-
-# Copy TypeScript worker script and its dependencies from builder
-COPY --from=builder /app/apps/web/scripts/run-pulling-workers.ts ./apps/web/scripts/run-pulling-workers.ts
+# Copy TypeScript source for worker (needed by tsx at runtime)
+COPY --from=builder /app/apps/web/scripts ./apps/web/scripts
 COPY --from=builder /app/apps/web/utils ./apps/web/utils
-COPY --from=builder /app/apps/web/app ./apps/web/app
+COPY --from=builder /app/apps/web/app/api ./apps/web/app/api
 COPY --from=builder /app/apps/web/types ./apps/web/types
-COPY --from=builder /app/apps/web/lib ./apps/web/lib
-COPY --from=builder /app/apps/web/tsconfig.worker.json ./apps/web/tsconfig.worker.json
-COPY --from=builder /app/packages/tsconfig ./packages/tsconfig
-COPY --from=builder /app/packages/loops ./packages/loops
-COPY --from=builder /app/packages/resend ./packages/resend
-COPY --from=builder /app/packages/slack ./packages/slack
-COPY --from=builder /app/packages/tinybird ./packages/tinybird
-COPY --from=builder /app/packages/tinybird-ai-analytics ./packages/tinybird-ai-analytics
+COPY --from=builder /app/apps/web/env.ts ./apps/web/env.ts
+COPY --from=builder /app/apps/web/tsconfig.json ./apps/web/tsconfig.json
 
 # Copy runtime scripts
 COPY docker/scripts /app/docker/scripts

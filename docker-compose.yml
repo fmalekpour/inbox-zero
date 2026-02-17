@@ -83,35 +83,11 @@ services:
       DIRECT_URL: ${DIRECT_URL:-postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-inboxzero}?schema=public}
       UPSTASH_REDIS_URL: ${UPSTASH_REDIS_URL:-http://serverless-redis-http:80}
       INTERNAL_API_URL: ${INTERNAL_API_URL:-http://web:3000}
-    restart: always
-
-  pulling-workers:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.prod
-    # image: ghcr.io/fmalekpour/inbox-zero:latest
-    # pull_policy: always
-    env_file:
-      - ./apps/web/.env
-    environment:
       PULLING_ENABLED: ${PULLING_ENABLED:-true}
       PULLING_DRY_RUN: ${PULLING_DRY_RUN:-false}
-      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-inboxzero}?schema=public}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
-      UPSTASH_REDIS_URL: ${UPSTASH_REDIS_URL:-http://serverless-redis-http:80}
-    command: ["sh", "-c", "cd /app/apps/web && tsx --tsconfig tsconfig.worker.json scripts/run-pulling-workers.ts"]
-    depends_on:
-      db:
-        condition: service_healthy
-        required: false
-      redis:
-        condition: service_started
-        required: false
-      web:
-        condition: service_started
-    networks:
-      - inbox-zero-network
-    restart: unless-stopped
+    restart: always
+    command: ["sh", "-c", "node /app/apps/web/server.js & (sleep 10 && cd /app && node --import tsx/esm apps/web/scripts/run-pulling-workers.ts)"]
 
   cron:
     image: alpine:latest
