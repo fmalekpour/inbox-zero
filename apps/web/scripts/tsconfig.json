@@ -5,7 +5,8 @@
     "target": "esnext",
     "outDir": "./",
     "skipLibCheck": true,
-    "noEmit": false
+    "noEmit": false,
+    "noImplicitAny": false
   },
   "include": ["run-pulling-workers.ts"]
 }
