@@ -87,7 +87,7 @@ services:
       PULLING_DRY_RUN: ${PULLING_DRY_RUN:-false}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
     restart: always
-    command: ["sh", "-c", "node /app/apps/web/server.js & (sleep 10 && cd /app && node --import tsx/esm apps/web/scripts/run-pulling-workers.ts)"]
+    command: ["sh", "-c", "node /app/apps/web/server.js & (sleep 10 && cd /app/apps/web && /usr/local/bin/tsx scripts/run-pulling-workers.ts)"]
 
   cron:
     image: alpine:latest
