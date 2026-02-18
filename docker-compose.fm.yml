@@ -1,0 +1,131 @@
+name: inbox-zero-services
+services:
+  web:
+    image: ${FULL_IMAGE:-ghcr.io/your-username/inbox-zero}:latest
+    pull_policy: never
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.prod
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./apps/web/.env
+    environment:
+      NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL:-http://localhost:3000}
+      NEXT_PUBLIC_BYPASS_PREMIUM_CHECKS: ${NEXT_PUBLIC_BYPASS_PREMIUM_CHECKS:-true}
+      NEXT_PUBLIC_EMAIL_SEND_ENABLED: ${NEXT_PUBLIC_EMAIL_SEND_ENABLED:-true}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-inboxzero}?schema=public}
+      DIRECT_URL: ${DIRECT_URL:-postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-inboxzero}?schema=public}
+      UPSTASH_REDIS_URL: ${UPSTASH_REDIS_URL:-http://redis-http:80}
+      UPSTASH_REDIS_TOKEN: ${UPSTASH_REDIS_TOKEN:-dev_token}
+      INTERNAL_API_URL: ${INTERNAL_API_URL:-http://web:3000}
+      PULLING_ENABLED: ${PULLING_ENABLED:-false}
+      PULLING_DRY_RUN: ${PULLING_DRY_RUN:-true}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  cron:
+    image: alpine:latest
+    command: >
+      sh -c "
+        apk add --no-cache curl &&
+        (
+          while true; do
+            echo \"[cron] Triggering pulling system...\"
+            curl -s -X POST 'http://web:3000/api/cron/pulling' -H \"Authorization: Bearer $${CRON_SECRET}\" || echo \"[cron] Warning: pulling request failed\"
+            sleep 30
+          done
+        ) &
+        (
+          while true; do
+            echo \"[cron] Processing scheduled actions...\"
+            curl -s -X GET 'http://web:3000/api/cron/scheduled-actions' -H \"Authorization: Bearer $${CRON_SECRET}\" || echo \"[cron] Warning: scheduled-actions request failed\"
+            sleep 60
+          done
+        ) &
+        (
+          while true; do
+            echo \"[cron] Processing follow-up reminders...\"
+            curl -s -X GET 'http://web:3000/api/follow-up-reminders' -H \"Authorization: Bearer $${CRON_SECRET}\" || echo \"[cron] Warning: follow-up-reminders request failed\"
+            sleep 1800
+          done
+        ) &
+        (
+          while true; do
+            echo \"[cron] Processing digest emails...\"
+            curl -s -X GET 'http://web:3000/api/resend/digest/all' -H \"Authorization: Bearer $${CRON_SECRET}\" || echo \"[cron] Warning: digest request failed\"
+            sleep 1800
+          done
+        ) &
+        (
+          while true; do
+            echo \"[cron] Processing meeting briefs...\"
+            curl -s -X GET 'http://web:3000/api/meeting-briefs' -H \"Authorization: Bearer $${CRON_SECRET}\" || echo \"[cron] Warning: meeting-briefs request failed\"
+            sleep 900
+          done
+        ) &
+        (
+          while true; do
+            echo \"[cron] Renewing email watches...\"
+            curl -s -X GET 'http://web:3000/api/watch/all' -H \"Authorization: Bearer $${CRON_SECRET}\" || echo \"[cron] Warning: watch request failed\"
+            sleep 21600
+          done
+        ) &
+        wait
+      "
+    env_file:
+      - ./apps/web/.env
+    depends_on:
+      - web
+    restart: always
+
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: inboxzero
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Upstash-compatible Redis HTTP interface
+  redis-http:
+    image: hiett/serverless-redis-http:latest
+    env_file:
+      - ./apps/web/.env
+    environment:
+      SRH_MODE: env
+      SRH_TOKEN: ${UPSTASH_REDIS_TOKEN:-dev_token}
+      SRH_CONNECTION_STRING: ${REDIS_URL:-redis://redis:6379}
+    ports:
+      - "8079:80"
+
+volumes:
+  postgres-data:
+  redis-data:

@@ -28,6 +28,8 @@ coverage
 .vscode
 
 # Local env files (do not bake secrets)
+.env
+**/.env
 *.env
 *.env.*
 !.env.example
