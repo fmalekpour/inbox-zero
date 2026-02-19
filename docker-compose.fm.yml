@@ -33,7 +33,7 @@ services:
   cron:
     image: alpine:latest
     command: >
-      sh -c "
+      sh -lc "
         apk add --no-cache curl && sleep 60 &&
         (
           while true; do
