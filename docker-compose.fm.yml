@@ -33,8 +33,8 @@ services:
   cron:
     image: alpine:latest
     command: >
-      sh -lc "
-        apk add --no-cache curl && sleep 60 &&
+      sh -c "
+        apk add --no-cache curl &&
         (
           while true; do
             echo \"[cron] Triggering pulling system...\"
@@ -72,6 +72,7 @@ services:
         ) &
         (
           while true; do
+            sleep 60
             echo \"[cron] Renewing email watches...\"
             curl -s -X GET 'http://web:3000/api/watch/all' -H \"Authorization: Bearer $${CRON_SECRET}\" || echo \"[cron] Warning: watch request failed\"
             sleep 21600
